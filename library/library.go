@@ -31,14 +31,14 @@ func InitBooks() {
 // List all books line by line by their name
 func ListBooks() {
 	for _, b := range Books {
-		fmt.Printf("Book: %s -- Author: %s -- ISBN: %d\n", b.name, b.author, b.ISBN)
+		fmt.Printf("Book: %s -- Author: %s -- ISBN: %d\n", b.Name, b.Author, b.ISBN)
 	}
 }
 
 // List given books line by line by their name
 func ListGivenBooks(books []Book) {
 	for _, b := range books {
-		fmt.Printf("Book: %s -- Author: %s -- ISBN: %d\n", b.name, b.author, b.ISBN)
+		fmt.Printf("Book: %s -- Author: %s -- ISBN: %d\n", b.Name, b.Author, b.ISBN)
 	}
 }
 
@@ -51,10 +51,10 @@ func FindBooks(word string) []Book {
 	isInteger, value := IsInt(searchWord)
 	for _, book := range Books {
 		// book name is turned to lowercase to search case insensitive
-		if strings.Contains(strings.ToLower(book.name), searchWord) {
+		if strings.Contains(strings.ToLower(book.Name), searchWord) {
 			result = append(result, *book)
 			// author name is turned to lowercase to search case insensitive
-		} else if strings.Contains(strings.ToLower(book.author), searchWord) {
+		} else if strings.Contains(strings.ToLower(book.Author), searchWord) {
 			result = append(result, *book)
 		} else if isInteger {
 			if book.ISBN == value {
@@ -74,7 +74,7 @@ func FindBook(id int) (Book, error) {
 		return *new(Book), ErrBookNotFound
 	}
 	book := *Books[id]
-	if book.isDeleted {
+	if book.IsDeleted {
 		return *new(Book), ErrBookNotFound
 	}
 	return *Books[id], nil
