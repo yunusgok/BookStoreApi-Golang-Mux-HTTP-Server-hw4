@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"strconv"
 	"strings"
+
+	"github.com/yunusgok/go-patika/csv_helper"
 )
 
 var Books []*Book
@@ -16,6 +18,11 @@ var ErrNotEnoughStock = errors.New("not enough stock")
 
 //initilize books with book names and authors in list
 func InitBooks() {
+	BooksList, err := csv_helper.ReadCsv("books.csv")
+	if err != nil {
+		fmt.Println("book not readed")
+		panic(err)
+	}
 	for _, b := range BooksList {
 		Books = append(Books, NewBook(b[0], b[1]))
 	}
