@@ -18,42 +18,30 @@ func NewBookRepository(db *gorm.DB) *BookRepository {
 }
 
 func (r *BookRepository) FindAll() []Book {
-	var cities []Book
-	r.db.Find(&cities)
+	var books []Book
+	r.db.Find(&books)
 
-	return cities
+	return books
 }
 
-func (r *BookRepository) FindByCountryCode(countryCode string) []Book {
-	var cities []Book
-	r.db.Where("CountryCode = ?", countryCode).Order("Id desc,name").Find(&cities)
-
-	// Struct
-	//r.db.Where(&Book{CountryCode: countryCode}).First(&cities)
-	//r.db.Where(map[string]interface{}{"CountryCode": countryCode, "Code": "01"}).Find(&cities)
-	//r.db.Where([]int64{20, 21, 22}).Find(&cities) // ID IN(20,21,22)
-
-	return cities
-}
-
-func (r *BookRepository) FindByCountryCodeOrBookCode(code string) []Book {
-	var cities []Book
-	r.db.Where("CountryCode = ?", code).Or("Code = ?", code).Find(&cities)
-	return cities
+func (r *BookRepository) FindByISBN(ISBN string) []Book {
+	var books []Book
+	r.db.Where("ISBN = ?", ISBN).Order("Id desc,name").Find(&books)
+	return books
 }
 
 func (r *BookRepository) FindByName(name string) []Book {
-	var cities []Book
-	r.db.Where("Name LIKE ?", "%"+name+"%").Find(&cities)
+	var books []Book
+	r.db.Where("Name LIKE ?", "%"+name+"%").Find(&books)
 
-	return cities
+	return books
 }
 
 func (r *BookRepository) FindByNameWithRawSQL(name string) []Book {
-	var cities []Book
-	r.db.Raw("SELECT * FROM Book WHERE Name LIKE ?", "%"+name+"%").Scan(&cities)
+	var books []Book
+	r.db.Raw("SELECT * FROM Book WHERE Name LIKE ?", "%"+name+"%").Scan(&books)
 
-	return cities
+	return books
 }
 
 func (r *BookRepository) GetById(id int) Book {
@@ -78,7 +66,6 @@ func (r *BookRepository) Create(c Book) error {
 
 func (r *BookRepository) Update(c Book) error {
 	result := r.db.Save(c)
-	//r.db.Model(&c).Update("name", "deneme")
 
 	if result.Error != nil {
 		return result.Error
@@ -87,8 +74,8 @@ func (r *BookRepository) Update(c Book) error {
 	return nil
 }
 
-func (r *BookRepository) Delete(c Book) error {
-	result := r.db.Delete(c)
+func (r *BookRepository) Delete(b Book) error {
+	result := r.db.Delete(b)
 
 	if result.Error != nil {
 		return result.Error
