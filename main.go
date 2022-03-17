@@ -7,22 +7,14 @@ import (
 	"path"
 	"strings"
 
-	"github.com/yunusgok/go-patika/infrastructure"
 	"github.com/yunusgok/go-patika/library"
 )
 
 var ErrInvalidInput = errors.New("input is invalid")
 
-var (
-	bookRepository *library.BookRepository
-)
-
 func init() {
 	library.InitBooks()
-	db := infrastructure.NewPostgresDB("host=localhost user=postgres password=postgres dbname=postgres port=5432 sslmode=disable TimeZone=Asia/Shanghai")
-	bookRepository = library.NewBookRepository(db)
-	bookRepository.Migration()
-	bookRepository.InsertSampleData()
+	library.InitRepo()
 }
 
 func main() {

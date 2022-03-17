@@ -2,7 +2,6 @@ package library
 
 import (
 	"errors"
-	"fmt"
 
 	"gorm.io/gorm"
 )
@@ -44,14 +43,13 @@ func (r *BookRepository) FindByNameWithRawSQL(name string) []Book {
 	return books
 }
 
-func (r *BookRepository) GetById(id int) Book {
+func (r *BookRepository) GetById(id int) *Book {
 	var Book Book
 	result := r.db.First(&Book, id)
 	if errors.Is(result.Error, gorm.ErrRecordNotFound) {
-		fmt.Printf("Book not found with id : %d", id)
-		return Book
+		return nil
 	}
-	return Book
+	return &Book
 }
 
 func (r *BookRepository) Create(c Book) error {

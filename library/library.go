@@ -6,6 +6,8 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/yunusgok/go-patika/infrastructure"
+
 	"github.com/yunusgok/go-patika/csv_helper"
 )
 
@@ -14,7 +16,13 @@ var BookNames []string
 
 var ErrBookNotFound = errors.New("Book not found")
 
+var ErrBookDeleted = errors.New("Book is deleted and can not be found")
+
 var ErrNotEnoughStock = errors.New("not enough stock")
+
+var (
+	bookRepository *BookRepository
+)
 
 //initilize books with book names and authors in list
 func InitBooks() {
@@ -27,10 +35,17 @@ func InitBooks() {
 		Books = append(Books, NewBook(b[0], b[1]))
 	}
 }
+func InitRepo() {
+	db := infrastructure.NewPostgresDB("host=localhost user=postgres password=postgres dbname=postgres port=5432 sslmode=disable TimeZone=Asia/Shanghai")
+	bookRepository = NewBookRepository(db)
+	bookRepository.Migration()
+	bookRepository.InsertSampleData()
+}
 
 // List all books line by line by their name
 func ListBooks() {
-	for _, b := range Books {
+	books := bookRepository.FindAll()
+	for _, b := range books {
 		fmt.Printf("Book: %s -- Author: %s -- ISBN: %d\n", b.Name, b.Author, b.ISBN)
 	}
 }
@@ -44,40 +59,40 @@ func ListGivenBooks(books []Book) {
 
 // Searches given words in books and return matched books names
 func FindBooks(word string) []Book {
-	result := make([]Book, 0)
+
 	// word is turned to lowercase to search case insensitive
 	searchWord := strings.ToLower(word)
 	// check word is integer so ISBN number can be searched
+	var result []Book
 	isInteger, value := IsInt(searchWord)
-	for _, book := range Books {
-		// book name is turned to lowercase to search case insensitive
-		if strings.Contains(strings.ToLower(book.Name), searchWord) {
+	if !isInteger {
+		result = bookRepository.FindByName(word)
+	} else {
+		result = bookRepository.FindByISBN(word)
+		book := bookRepository.GetById(value)
+		if book != nil {
 			result = append(result, *book)
-			// author name is turned to lowercase to search case insensitive
-		} else if strings.Contains(strings.ToLower(book.Author), searchWord) {
-			result = append(result, *book)
-		} else if isInteger {
-			if book.ISBN == value {
-				result = append(result, *book)
-			}
 		}
 	}
 	if len(result) == 0 {
-		fmt.Printf("'%s' not found", word)
+		fmt.Printf("No boom found with given parameter '%s'", word)
 	}
+
 	return result
 }
 
 //Find book with id
 func FindBook(id int) (Book, error) {
-	if len(Books) < id {
+
+	book := bookRepository.GetById(id)
+	if book == nil {
 		return *new(Book), ErrBookNotFound
 	}
-	book := *Books[id]
 	if book.IsDeleted {
-		return *new(Book), ErrBookNotFound
+		return *new(Book), ErrBookDeleted
 	}
-	return *Books[id], nil
+
+	return *book, nil
 }
 
 //Buy book if enoubh count exist in stock
@@ -90,7 +105,9 @@ func Buy(id int, count int) {
 	err2 := book.Buy(count)
 	if err2 != nil {
 		fmt.Println(err2.Error())
+		return
 	}
+	bookRepository.Update(book)
 
 }
 
@@ -108,14 +125,17 @@ func IsInt(s string) (bool, int) {
 
 // deletes book if exist
 func DeleteBook(id int) {
-	b, err := FindBook(id)
+	book, err := FindBook(id)
 	if err == nil {
-		err2 := b.Delete()
+		err2 := book.Delete()
 		if err2 != nil {
 			fmt.Println(err2.Error())
+			return
 		}
 	} else {
 		fmt.Println(err.Error())
+		return
 	}
+	bookRepository.Update(book)
 
 }
