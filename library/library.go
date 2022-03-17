@@ -31,14 +31,14 @@ func InitBooks() {
 // List all books line by line by their name
 func ListBooks() {
 	for _, b := range Books {
-		fmt.Printf("Book: %s -- Author: %s-- ISBN: %d\n", b.name, b.author, b.ISBN)
+		fmt.Printf("Book: %s -- Author: %s -- ISBN: %d\n", b.name, b.author, b.ISBN)
 	}
 }
 
 // List given books line by line by their name
 func ListGivenBooks(books []Book) {
 	for _, b := range books {
-		fmt.Printf("Book: %s -- Author: %s-- ISBN: %d\n", b.name, b.author, b.ISBN)
+		fmt.Printf("Book: %s -- Author: %s -- ISBN: %d\n", b.name, b.author, b.ISBN)
 	}
 }
 
