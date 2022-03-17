@@ -75,7 +75,7 @@ func FindBooks(word string) []Book {
 		}
 	}
 	if len(result) == 0 {
-		fmt.Printf("No boom found with given parameter '%s'", word)
+		fmt.Printf("No book found with given parameter '%s'", word)
 	}
 
 	return result
