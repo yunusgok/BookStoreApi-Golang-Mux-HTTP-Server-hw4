@@ -97,6 +97,10 @@ func FindBook(id int) (Book, error) {
 
 //Buy book if enoubh count exist in stock
 func Buy(id int, count int) {
+	if count <= 0 {
+		fmt.Println("Alınacak kitap sayısı positif sayı olmalıdır.")
+		return
+	}
 	book, err := FindBook(id)
 	if err != nil {
 		fmt.Println(err.Error())
