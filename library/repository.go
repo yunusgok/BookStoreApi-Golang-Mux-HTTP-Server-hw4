@@ -36,13 +36,6 @@ func (r *BookRepository) FindByName(name string) []Book {
 	return books
 }
 
-func (r *BookRepository) FindByNameWithRawSQL(name string) []Book {
-	var books []Book
-	r.db.Raw("SELECT * FROM Book WHERE Name LIKE ?", "%"+name+"%").Scan(&books)
-
-	return books
-}
-
 func (r *BookRepository) GetById(id int) *Book {
 	var Book Book
 	result := r.db.First(&Book, id)
@@ -52,8 +45,8 @@ func (r *BookRepository) GetById(id int) *Book {
 	return &Book
 }
 
-func (r *BookRepository) Create(c Book) error {
-	result := r.db.Create(c)
+func (r *BookRepository) Create(b Book) error {
+	result := r.db.Create(GiveISBN(b))
 
 	if result.Error != nil {
 		return result.Error
@@ -62,9 +55,8 @@ func (r *BookRepository) Create(c Book) error {
 	return nil
 }
 
-func (r *BookRepository) Update(c Book) error {
-	result := r.db.Save(c)
-
+func (r *BookRepository) Update(b Book) error {
+	result := r.db.Where(Book{ISBN: b.ISBN}).Updates(&b)
 	if result.Error != nil {
 		return result.Error
 	}
@@ -93,7 +85,6 @@ func (r *BookRepository) DeleteById(id int) error {
 
 func (r *BookRepository) Migration() {
 	r.db.AutoMigrate(&Book{})
-	//https://gorm.io/docs/migration.html#content-inner
 }
 
 func (r *BookRepository) InsertSampleData() {

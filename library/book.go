@@ -41,6 +41,13 @@ func NewBook(name string, author string) *Book {
 	return book
 }
 
+func GiveISBN(b Book) *Book {
+	if b.ISBN == 0 {
+		b.ISBN = rand.Intn(100000) + 100000
+	}
+	return &b
+}
+
 type Deletable interface {
 	Delete()
 }
@@ -56,11 +63,12 @@ func (book *Book) Delete() error {
 }
 
 // buy book with given count if stock is enough
-func (book *Book) Buy(count int) error {
+func (book *Book) Buy(count int) (string, error) {
 	if book.StockCount < count {
-		return ErrNotEnoughStock
+		return "", ErrNotEnoughStock
 	}
 	book.StockCount -= count
+	result := fmt.Sprintf("Book: %s is buyed by user. New stockCount is %d", book.Name, book.StockCount)
 	fmt.Printf("Book: %s is buyed by user. New stockCount is %d", book.Name, book.StockCount)
-	return nil
+	return result, nil
 }

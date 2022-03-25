@@ -19,6 +19,7 @@ var ErrBookNotFound = errors.New("Book not found")
 var ErrBookDeleted = errors.New("Book is deleted and can not be found")
 
 var ErrNotEnoughStock = errors.New("not enough stock")
+var ErrInvalidInput = errors.New("input is invalid")
 
 var (
 	bookRepository *BookRepository
@@ -43,11 +44,12 @@ func InitRepo() {
 }
 
 // List all books line by line by their name
-func ListBooks() {
+func ListBooks() []Book {
 	books := bookRepository.FindAll()
 	for _, b := range books {
 		fmt.Printf("Book: %s -- Author: %s -- ISBN: %d\n", b.Name, b.Author, b.ISBN)
 	}
+	return books
 }
 
 // List given books line by line by their name
@@ -96,23 +98,22 @@ func FindBook(id int) (Book, error) {
 }
 
 //Buy book if enoubh count exist in stock
-func Buy(id int, count int) {
+func Buy(id int, count int) (string, error) {
 	if count <= 0 {
-		fmt.Println("Alınacak kitap sayısı positif sayı olmalıdır.")
-		return
+		return "", errors.New("count must be positive")
 	}
 	book, err := FindBook(id)
 	if err != nil {
 		fmt.Println(err.Error())
-		return
+		return "", err
 	}
-	err2 := book.Buy(count)
+	res, err2 := book.Buy(count)
 	if err2 != nil {
 		fmt.Println(err2.Error())
-		return
+		return "", err2
 	}
 	bookRepository.Update(book)
-
+	return res, nil
 }
 
 //check given string is int and return to value
@@ -128,18 +129,26 @@ func IsInt(s string) (bool, int) {
 }
 
 // deletes book if exist
-func DeleteBook(id int) {
+func DeleteBook(id int) error {
 	book, err := FindBook(id)
 	if err == nil {
 		err2 := book.Delete()
 		if err2 != nil {
 			fmt.Println(err2.Error())
-			return
+			return err2
 		}
 	} else {
 		fmt.Println(err.Error())
-		return
+		return err
 	}
 	bookRepository.Update(book)
+	return nil
+}
 
+func CreateBook(book Book) error {
+	return bookRepository.Create(book)
+}
+
+func UpdateBook(book Book) error {
+	return bookRepository.Update(book)
 }
